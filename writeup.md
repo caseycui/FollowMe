@@ -67,7 +67,7 @@ Initially, the epoch number is set to 20. However, error plot of training and va
 The larger the batch size, the more accuracy we gain with each iteration. However, there's a machine limit that we can not set the batch size to be too large. Also, with a large batch size, it means we will overfit earlier, since within each iteration, more data are seen by the network.
 
 ##### Steps per epoch
-Keeping this at 100 will have a better performance given the other set parameters. Our data size is in the ~5000 range.
+Keeping this at 200 will have a better performance than 100 given the other set parameters. Our data size is in the ~5000 range.
 
 ##### Learning Rate
 After trial-and-error, I've set the learning rate to be 0.01. Going larger in learning rate makes the model unstable and sometimes not converge. Going smaller makes the model slow to train and may settle in a local optimum. 
