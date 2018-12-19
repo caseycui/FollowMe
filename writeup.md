@@ -79,6 +79,7 @@ The difference between a fully connected layer and a 1x1 conv layer is that: wit
 #### 5. Efforts, Results * Observations
 ##### Efforts
 For better training, I have collected additional image, especially for hero to walk in a large crowd, as well as following people that look like the hero (same color clothing, for example)
+However, the following other people data collection has caused the trained model to have a lower performance. The false positives of recognizing the hero increases tremendouly.
 
 ##### Results
 
