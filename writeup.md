@@ -73,10 +73,18 @@ After trial-and-error, I've set the learning rate to be 0.01. Going larger in le
 #### 4. 1x1 conv layer vs. fullly connected layer
 The difference between a fully connected layer and a 1x1 conv layer is that: with fully connnected layer, we aim to come to a conclusion of what this image (or other forms of input) is about, aka, generate a fixed number of categorical labels (in a classification problem); with 1x1 conv layer, we aim to tell what each part of the image is about, aka, the categorical probabilities of each section of an image. With fully connected layer, we collapse the input dimensions, multiply, activate and add to calculate the categorical probabilites. With 1x1 conv layer, we still do the multiply and activate, but do not 'add' or collapse all dimensions into 1, aka, preserve the spatial information about the input so that we can tell where in the image it says about what.
 
-#### 5. Efforts & Results
-For better training, I have collected additional image, especially for hero to walk in a large crowd. 
-This improves the initial IOU score, as I collect more data, it does not particularly improve the test data score.
+#### 5. Efforts, Results * Observations
+##### Efforts
+For better training, I have collected additional image, especially for hero to walk in a large crowd, as well as following people that look like the hero (same color clothing, for example)
+
+##### Results
+
 The model is able to reach an IOU score of 0.37
+
+##### Observations
+More data improves the initial IOU score, however, as I collect more data, it does not necessarily improve the test data score.
+Collecting individual other people data will help with the classification of both the hero, and other people, since the machine needs to tell the hero from other people, thus both data is needed in large quantities.
+
 If the model will be redeployed to follow a cat, or dog, instead of the hero, it will need to be retrained. However, the network may be easier to train since a cat or dog image is drastically different from other people, or the background. However, if we have other cats and dogs in the scene, it may be just as hard to train.
 
 #### 6. Improvements & Future work
