@@ -61,7 +61,7 @@ Apparently, the deeper network is able to abstract feautures a little bit better
 However, this does not improve the IOU, I think this is due to overfitting happening earlier for deeper network. Thus, I reduced the number of epoch from 8 to 6.
 
 ##### Epoch
-Initially, the epoch number is set to 20. However, error plot of training and validation data quickly shows that overfitting happens around epoch 7-9. Thus, after a few trial-and-error, I have set the epoch to be 8 for 3 layers, and 6 for 4 layers.
+Initially, the epoch number is set to 20. However, error plot of training and validation data quickly shows that overfitting happens around epoch 7-9. Thus, after a few trial-and-error, I applied early stopping at epoch 8 for 3 layers, and 6 for 4 layers.
 
 ##### Batch Size
 The larger the batch size, the more accuracy we gain with each iteration. However, there's a machine limit that we can not set the batch size to be too large. Also, with a large batch size, it means we will overfit earlier, since within each iteration, more data are seen by the network.
