@@ -68,11 +68,11 @@ After trial-and-error, I've set the learning rate to be 0.01. Going larger in le
 #### 4. 1x1 conv layer vs. fullly connected layer
 The difference between a fully connected layer and a 1x1 conv layer is that: with fully connnected layer, we aim to come to a conclusion of what this image (or other forms of input) is about, aka, generate a fixed number of categorical labels (in a classification problem); with 1x1 conv layer, we aim to tell what each part of the image is about, aka, the categorical probabilities of each section of an image. With fully connected layer, we collapse the input dimensions, multiply, activate and add to calculate the categorical probabilites. With 1x1 conv layer, we still do the multiply and activate, but do not 'add' or collapse all dimensions into 1, aka, preserve the spatial information about the input so that we can tell where in the image it says about what.
 
-#### Efforts & Results
+#### 5. Efforts & Results
 For better training, I have collected additional image, especially for hero to walk in a large crowd. 
 This improves the initial IOU score, as I collect more data, it does not particularly improve the test data score.
 The model is able to reach an IOU score of 
 If the model will be redeployed to follow a cat, or dog, instead of the hero, it will need to be retrained. However, the network may be easier to train since a cat or dog image is drastically different from other people, or the background. However, if we have other cats and dogs in the scene, it may be just as hard to train.
 
-#### Improvements & Future work
+#### 6. Improvements & Future work
 This project takes a lot of time to train. As I understand on a high level how each layer works, and how they should be used, sometimes it's hard to interprete the results of improvement efforts. For example, in the lecture it suggests not use skip connections in all the layers, but once I take out the any skip connection, the model test score falls by a large percent. Also, I would like to read more on how to fine-tune filter size in each layer, how the choice of strides affect the results, and other techniques to fine-tune the network to reach optimal performance.
