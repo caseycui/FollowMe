@@ -25,10 +25,11 @@ You're reading it!
 #### 2. Network analysis
 The network consists of mainly 3 parts: encoder, 1x1 convolution, and decoder.
 ##### Encoder layers
-The encoder part is composed of 3 encoder layers. 
-The first layer has a filter size of 32, and stride of 2. The output shape of this layer is 64x64x32 (128/stride)
-The second layer has a filter size of 64, and stride of 2. The output shape of this layer is 32x32x64 
-The third layer has a filter size of 128, and stride of 2. The output shape of this layer is 16x16x128
+The encoder part is composed of 4 encoder layers. 
+The first layer has a filter size of 16, and stride of 2. The output shape of this layer is 64x64x32 (128/stride)
+The second layer has a filter size of 32, and stride of 2. The output shape of this layer is 32x32x64 
+The third layer has a filter size of 64, and stride of 2. The output shape of this layer is 16x16x128
+The fourth layer has a filter size of 128, and stride of 2. The output shape of this layer is 8x8x128
 
 The encoder layers work to abstract features from the images. With each layer, features from colors and shapes to complex colors and shapes will be learned by the network.
 ##### 1 x 1 convolution layer
@@ -36,16 +37,16 @@ The convolution layer takes the encoder output and perform 1x1 convolution on it
 
 Here we use a 1x1 conv layer with filter_depth=3, and strides=1, so that we can preserve the shape of the input layer.
 
-The output shape is 16x16x3
+The output shape is 8x8x3
 
 ##### Decoder layers
-The decoder part consists of 3 decoder layers.
+The decoder part consists of 4 decoder layers.
 
 Each layer has an upsample layer, a concatenate layer, and a convolution with batchnorm layer.
 
 The purpose of the upsample layer is to upsample the probabilities from the 1x1 convolution layer to a larger output, eventually, the original image size, so that we can get the categorical probabilities of each pixel in the original image. Here, each decoder layer output is upscaled by 2. 
 
-Therefore, the output shape of first decoder layer is 32x32xh, the second decoder layer output is 64x64xh, the third 128x128xh
+Therefore, the output shapes of decoder layers are 16x16xh, 32x32xh, 64x64xh, and 128x128xh
 
 The purpose of the concatenate layer is to perform the 'skip' connections so that we add in some encoder layer output to the decoder layer, which helps with precision boundaries in detecting categories.
 
@@ -54,9 +55,13 @@ Finally, the number of decoder layers match that of encoder layers, and we conca
 
 #### 3. Network parameters
 ##### Network Depth
+Initially, the network depth for encoder and decoder is each set to 3. 
+After experimenting with depth of 4, I observed a significant drop in error rate from ~0.8 to ~0.04.
+Apparently, the deeper network is able to abstract feautures a little bit better.
+However, this does not improve the IOU, I think this is due to overfitting happening earlier for deeper network. Thus, I reduced the number of epoch from 8 to 6.
 
 ##### Epoch
-Initially, the epoch number is set to 20. However, error plot of training and validation data quickly shows that overfitting happens around epoch 7-9. Thus, after a few trial-and-error, I have set the epoch to be 8. 
+Initially, the epoch number is set to 20. However, error plot of training and validation data quickly shows that overfitting happens around epoch 7-9. Thus, after a few trial-and-error, I have set the epoch to be 8 for 3 layers, and 6 for 4 layers.
 
 ##### Batch Size
 The larger the batch size, the more accuracy we gain with each iteration. However, there's a machine limit that we can not set the batch size to be too large. Also, with a large batch size, it means we will overfit earlier, since within each iteration, more data are seen by the network.
@@ -71,8 +76,17 @@ The difference between a fully connected layer and a 1x1 conv layer is that: wit
 #### 5. Efforts & Results
 For better training, I have collected additional image, especially for hero to walk in a large crowd. 
 This improves the initial IOU score, as I collect more data, it does not particularly improve the test data score.
-The model is able to reach an IOU score of 
+The model is able to reach an IOU score of 0.37
 If the model will be redeployed to follow a cat, or dog, instead of the hero, it will need to be retrained. However, the network may be easier to train since a cat or dog image is drastically different from other people, or the background. However, if we have other cats and dogs in the scene, it may be just as hard to train.
 
 #### 6. Improvements & Future work
+##### Training Network
 This project takes a lot of time to train. As I understand on a high level how each layer works, and how they should be used, sometimes it's hard to interprete the results of improvement efforts. For example, in the lecture it suggests not use skip connections in all the layers, but once I take out the any skip connection, the model test score falls by a large percent. Also, I would like to read more on how to fine-tune filter size in each layer, how the choice of strides affect the results, and other techniques to fine-tune the network to reach optimal performance.
+
+##### Data collection
+I noticed in test evaluation that: 
+case#1 for following behind the target, the IOU for hero is 0.86, other people 0.24
+case#2 for patrol without target, the IOU for hero is 0, other people 0.59
+case#3 for target from far away, the IOU for hero is 0.17, other people 0.32
+
+Since I've collected most of data for following target, a small part for target from far away, these scenarios are doing relatively well. To further improve the model, I need to collect data in case#2 and case#3 
