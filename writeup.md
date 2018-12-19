@@ -1,24 +1,7 @@
-## Project: Search and Sample Return
+## Project: Follow Me
 ### Writeup Template: You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
 
 ---
-
-
-**The goals / steps of this project are the following:**  
-
-**Training / Calibration**  
-
-* Download the simulator and take data in "Training Mode"
-* Test out the functions in the Jupyter Notebook provided
-* Add functions to detect obstacles and samples of interest (golden rocks)
-* Fill in the `process_image()` function with the appropriate image processing steps (perspective transform, color threshold etc.) to get from raw images to a map.  The `output_image` you create in this step should demonstrate that your mapping pipeline works.
-* Use `moviepy` to process the images in your saved dataset with the `process_image()` function.  Include the video you produce as part of your submission.
-
-**Autonomous Navigation / Mapping**
-
-* Fill in the `perception_step()` function within the `perception.py` script with the appropriate image processing functions to create a map and update `Rover()` data (similar to what you did with `process_image()` in the notebook). 
-* Fill in the `decision_step()` function within the `decision.py` script with conditional statements that take into consideration the outputs of the `perception_step()` in deciding how to issue throttle, brake and steering commands. 
-* Iterate on your perception and decision function until your rover does a reasonable (need to define metric) job of navigating and mapping.  
 
 [//]: # (Image References)
 
@@ -39,47 +22,57 @@
 
 You're reading it!
 
-### Notebook Analysis
-#### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
-For rock sample detection, I have utilitzed the fact that rocks are yellow in color. Therefore, I created a filter which set the R and G channels to be above 100, and B channel to be below 50.
+#### 2. Network analysis
+The network consists of mainly 3 parts: encoder, 1x1 convolution, and decoder.
+##### Encoder layers
+The encoder part is composed of 3 encoder layers. 
+The first layer has a filter size of 32, and stride of 2. The output shape of this layer is 64x64x32 (128/stride)
+The second layer has a filter size of 64, and stride of 2. The output shape of this layer is 32x32x64 
+The third layer has a filter size of 128, and stride of 2. The output shape of this layer is 16x16x128
 
-![alt text][image3]
+The encoder layers work to abstract features from the images. With each layer, features from colors and shapes to complex colors and shapes will be learned by the network.
+##### 1 x 1 convolution layer
+The convolution layer takes the encoder output and perform 1x1 convolution on it. The purpose of this layer is to preserve the spatial information of the encoder layer output and generate categorical probability on each pixel.
 
-The obstacles are relatively dark compared to the sand, therefore, I created a color threshold for obstacles so that if all channels are below 100, it is identified as obstacles.
+Here we use a 1x1 conv layer with filter_depth=3, and strides=1, so that we can preserve the shape of the input layer.
 
-![alt text][image5]
+The output shape is 16x16x3
 
-#### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
-In the process_image() step, the navigable terrain, obstacles and rock samples are mapped into a worldmap.
+##### Decoder layers
+The decoder part consists of 3 decoder layers.
 
-The video directory is:  ./output/test_mapping.mp4 
+Each layer has an upsample layer, a concatenate layer, and a convolution with batchnorm layer.
 
-### Autonomous Navigation and Mapping
+The purpose of the upsample layer is to upsample the probabilities from the 1x1 convolution layer to a larger output, eventually, the original image size, so that we can get the categorical probabilities of each pixel in the original image. Here, each decoder layer output is upscaled by 2. 
 
-#### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
-In the perception_step(), the following filters and transforms are performed on the image: 1) color thresholding to identify rocks, navigable terrain, and obstacles 2) perspective transform to map image from front view to birds-eye view 3) convert image data to rover-centric coordinates 4) covert rover-centric coordinates to world coordinates 5) update world map 6) covert to polar coordinates for rover control purposes
-In the decision_step(), the main update is to set the rover to the mean of navigable angles calculated from above step 
+Therefore, the output shape of first decoder layer is 32x32xh, the second decoder layer output is 64x64xh, the third 128x128xh
 
-#### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
+The purpose of the concatenate layer is to perform the 'skip' connections so that we add in some encoder layer output to the decoder layer, which helps with precision boundaries in detecting categories.
 
-**Note: running the simulator with different choices of resolution and graphics quality may produce different results, particularly on different machines!  Make a note of your simulator settings (resolution and graphics quality set on launch) and frames per second (FPS output to terminal by `drive_rover.py`) in your writeup when you submit the project so your reviewer can reproduce your results.**
+Finally, the number of decoder layers match that of encoder layers, and we concatenate the layers which have the same dimensions. 
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
-##### Result
-The rover is able to run in autonomous mode and start mapping and finding rock samples.
+#### 3. Network parameters
+##### Network Depth
 
-![alt text][image1]
+##### Epoch
+Initially, the epoch number is set to 20. However, error plot of training and validation data quickly shows that overfitting happens around epoch 7-9. Thus, after a few trial-and-error, I have set the epoch to be 8. 
 
-I have tried to identify the edges of the path such as the following to set the rover steer to go along edges. But didn't find a good way to detect it in time.
+##### Batch Size
+The larger the batch size, the more accuracy we gain with each iteration. However, there's a machine limit that we can not set the batch size to be too large. Also, with a large batch size, it means we will overfit earlier, since within each iteration, more data are seen by the network.
 
-![alt text][image4]
+##### Learning Rate
+After trial-and-error, I've set the learning rate to be 0.01. Going larger in learning rate makes the model unstable and sometimes not converge. Going smaller makes the model slow to train and may settle in a local optimum. 
 
-I have also tried to set the mean angles to be biased towards the edge, but it's hard to set one rule for all cases.
 
-##### Improvements & Future work
-This is a fun project, it's relatively easy to reach a passing point, so I was hoping to get back and work on it later but never got the time. 
+#### 4. 1x1 conv layer vs. fullly connected layer
+The difference between a fully connected layer and a 1x1 conv layer is that: with fully connnected layer, we aim to come to a conclusion of what this image (or other forms of input) is about, aka, generate a fixed number of categorical labels (in a classification problem); with 1x1 conv layer, we aim to tell what each part of the image is about, aka, the categorical probabilities of each section of an image. With fully connected layer, we collapse the input dimensions, multiply, activate and add to calculate the categorical probabilites. With 1x1 conv layer, we still do the multiply and activate, but do not 'add' or collapse all dimensions into 1, aka, preserve the spatial information about the input so that we can tell where in the image it says about what.
 
-For improvement, there're several things that can be done. First, implement the pickup rock path so that when a rover finds a rock, it will navigate towards the rock and pick it up. Second, obstacle avoidance needs to be improved, sometimes the rover gets stuck behind an obstacle. Third, find ways to navigate the rover to explore new terrains.
+#### Efforts & Results
+For better training, I have collected additional image, especially for hero to walk in a large crowd. 
+This improves the initial IOU score, as I collect more data, it does not particularly improve the test data score.
+The model is able to reach an IOU score of 
+If the model will be redeployed to follow a cat, or dog, instead of the hero, it will need to be retrained. However, the network may be easier to train since a cat or dog image is drastically different from other people, or the background. However, if we have other cats and dogs in the scene, it may be just as hard to train.
 
-Inside these tasks, there're subtasks like, how to identify the edges (or something else) in order to allow the rover to pick up rocks more effectively; implement way-outs from obstacles, etc.
+#### Improvements & Future work
+This project takes a lot of time to train. As I understand on a high level how each layer works, and how they should be used, sometimes it's hard to interprete the results of improvement efforts. For example, in the lecture it suggests not use skip connections in all the layers, but once I take out the any skip connection, the model test score falls by a large percent. Also, I would like to read more on how to fine-tune filter size in each layer, how the choice of strides affect the results, and other techniques to fine-tune the network to reach optimal performance.
