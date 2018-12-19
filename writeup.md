@@ -93,6 +93,7 @@ If the model will be redeployed to follow a cat, or dog, instead of the hero, it
 #### 6. Improvements & Future work
 ##### Training Network
 This project takes a lot of time to train. As I understand on a high level how each layer works, and how they should be used, sometimes it's hard to interprete the results of improvement efforts. For example, in the lecture it suggests not use skip connections in all the layers, but once I take out the any skip connection, the model test score falls by a large percent. Also, I would like to read more on how to fine-tune filter size in each layer, how the choice of strides affect the results, and other techniques to fine-tune the network to reach optimal performance.
+Another point worth mentioning is the randomization of data set, so that each batch has a good representation of all three scenarios evenly distributed.
 
 ##### Data collection
 I noticed in test evaluation that: 
