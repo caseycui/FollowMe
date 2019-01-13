@@ -30,6 +30,7 @@ The first layer has a filter size of 16, and stride of 2. The output shape of th
 The second layer has a filter size of 32, and stride of 2. The output shape of this layer is 32x32x64 
 The third layer has a filter size of 64, and stride of 2. The output shape of this layer is 16x16x128
 The fourth layer has a filter size of 128, and stride of 2. The output shape of this layer is 8x8x128
+The encoder layer is used to extract information from the image. We use various filters to abstract different features of the image, like simple lines, shapes, more complicated shapes, etc, with the deepening of layers. This extraction will cause information loss from the original image as the filter scans through the image and performs convolution over neighboring pixels.
 
 The encoder layers work to abstract features from the images. With each layer, features from colors and shapes to complex colors and shapes will be learned by the network.
 ##### 1 x 1 convolution layer
@@ -52,6 +53,7 @@ The purpose of the concatenate layer is to perform the 'skip' connections so tha
 
 Finally, the number of decoder layers match that of encoder layers, and we concatenate the layers which have the same dimensions. 
 
+The purpose of decoder layer is to translate the probability of the 'categorized' smaller image back to the original image, by interpolating the probability back into original pixel space. In this case, it is done through upscaling. This is not accurate, as we have previously lost information during encoding, therefore, we use some sort of bypass layers to bypass the less encoded layers to the decode layers to compensate for the information loss.
 
 #### 3. Network parameters
 ##### Network Depth
@@ -83,7 +85,7 @@ However, the following other people data collection has caused the trained model
 
 ##### Results
 
-The model is able to reach an IOU score of 0.37
+The model is able to reach an IOU score of 0.405
 
 ##### Observations
 More data improves the initial IOU score, however, as I collect more data, it does not necessarily improve the test data score.
