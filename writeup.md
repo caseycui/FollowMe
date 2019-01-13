@@ -85,7 +85,7 @@ However, the following other people data collection has caused the trained model
 
 ##### Results
 
-The model is able to reach an IOU score of 0.405
+The model is able to reach an IOU score of 0.419
 
 ##### Observations
 More data improves the initial IOU score, however, as I collect more data, it does not necessarily improve the test data score.
@@ -104,4 +104,4 @@ case#1 for following behind the target, the IOU for hero is 0.86, other people 0
 case#2 for patrol without target, the IOU for hero is 0, other people 0.59
 case#3 for target from far away, the IOU for hero is 0.17, other people 0.32
 
-Since I've collected most of data for following target, a small part for target from far away, these scenarios are doing relatively well. To further improve the model, I need to collect data in case#2 and case#3 
+Since I've collected most of data for following target, a set of data of target from far away, and a set of data of patrol without target. The following target scenario is doing relatively well compared to the other two cases. To further improve the model, I need to collect data in case#2 and case#3 
