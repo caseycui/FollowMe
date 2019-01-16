@@ -29,9 +29,9 @@ The neural network structure is shown below:
 ![alt text][image1]
 ##### Encoder layers
 The encoder part is composed of 4 encoder layers. 
-The first layer has a filter size of 16, and stride of 2. The output shape of this layer is 64x64x32 (128/stride)
-The second layer has a filter size of 32, and stride of 2. The output shape of this layer is 32x32x64 
-The third layer has a filter size of 64, and stride of 2. The output shape of this layer is 16x16x128
+The first layer has a filter size of 16, and stride of 2. The output shape of this layer is 64x64x16 (128/stride)
+The second layer has a filter size of 32, and stride of 2. The output shape of this layer is 32x32x32 
+The third layer has a filter size of 64, and stride of 2. The output shape of this layer is 16x16x64
 The fourth layer has a filter size of 128, and stride of 2. The output shape of this layer is 8x8x128
 The encoder layer is used to extract information from the image. We use various filters to abstract different features of the image, like simple lines, shapes, more complicated shapes, etc, with the deepening of layers. This extraction will cause information loss from the original image as the filter scans through the image and performs convolution over neighboring pixels.
 
@@ -50,7 +50,7 @@ Each layer has an upsample layer, a concatenate layer, and a convolution with ba
 
 The purpose of the upsample layer is to upsample the probabilities from the 1x1 convolution layer to a larger output, eventually, the original image size, so that we can get the categorical probabilities of each pixel in the original image. Here, each decoder layer output is upscaled by 2. 
 
-Therefore, the output shapes of decoder layers are 16x16xh, 32x32xh, 64x64xh, and 128x128xh
+Therefore, the output shapes of decoder layers are 16x16x64, 32x32x32, 64x64x16, and 128x128x3
 
 The purpose of the concatenate layer is to perform the 'skip' connections so that we add in some encoder layer output to the decoder layer, which helps with precision boundaries in detecting categories.
 
