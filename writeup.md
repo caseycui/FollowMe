@@ -29,11 +29,16 @@ The neural network structure is shown below:
 ![alt text][image1]
 ##### Encoder layers
 The encoder part is composed of 4 encoder layers. 
-The first layer has a filter size of 16, and stride of 2. The output shape of this layer is 64x64x16 (128/stride)
-The second layer has a filter size of 32, and stride of 2. The output shape of this layer is 32x32x32 
-The third layer has a filter size of 64, and stride of 2. The output shape of this layer is 16x16x64
-The fourth layer has a filter size of 128, and stride of 2. The output shape of this layer is 8x8x128
-The encoder layer is used to extract information from the image. We use various filters to abstract different features of the image, like simple lines, shapes, more complicated shapes, etc, with the deepening of layers. This extraction will cause information loss from the original image as the filter scans through the image and performs convolution over neighboring pixels.
+
+The first layer has a filter size of 16, and stride of 2. The output shape of this layer is 64x64x16 (128/stride).
+
+The second layer has a filter size of 32, and stride of 2. The output shape of this layer is 32x32x32.
+
+The third layer has a filter size of 64, and stride of 2. The output shape of this layer is 16x16x64.
+
+The fourth layer has a filter size of 128, and stride of 2. The output shape of this layer is 8x8x128.
+
+The encoder layer is used to extract information from the image. We use various filters to abstract different features of the image, like simple lines, shapes, more complicated shapes, etc, with the deepening of layers. This extraction will cause information loss from the original image as the filter scans through the image and performs convolution(multiply and add) over neighboring pixels.
 
 The encoder layers work to abstract features from the images. With each layer, features from colors and shapes to complex colors and shapes will be learned by the network.
 ##### 1 x 1 convolution layer
@@ -84,27 +89,30 @@ The difference between a fully connected layer and a 1x1 conv layer is that: wit
 #### 5. Efforts, Results * Observations
 ##### Efforts
 For better training, I have collected additional image, especially for hero to walk in a large crowd, as well as following people that look like the hero (same color clothing, for example)
-However, the following other people data collection has caused the trained model to have a lower performance. The false positives of recognizing the hero increases tremendouly.
+However, the following other people data collection has caused the trained model to have a lower performance. The false positives of recognizing the hero increases tremendouly. I think this is due to how test set are composed of and a relatively small data set. Since one part of the test set is about recognizing the hero when patrolling over, with a small data set, the network could be learning that the person pattern that looks like a rover is patrolling and following is the hero. Therefore, if the dataset doesn't include following other people images, and the test set doesn't test following other people, the score is pretty high. But this doesn't mean the network is robust in telling the difference between following the hero and following other people. 
 
 ##### Results
 
 The model is able to reach an IOU score of 0.419
 
 ##### Observations
-More data improves the initial IOU score, however, as I collect more data, it does not necessarily improve the test data score.
+More data improves the initial IOU score, however, as I collect more data, it does not necessarily improve the test data score, due to the reason explained above regarding test set and dataset similarity.
 Collecting individual other people data will help with the classification of both the hero, and other people, since the machine needs to tell the hero from other people, thus both data is needed in large quantities.
 
 If the model will be redeployed to follow a cat, or dog, instead of the hero, it will need to be retrained. However, the network may be easier to train since a cat or dog image is drastically different from other people, or the background. However, if we have other cats and dogs in the scene, it may be just as hard to train.
 
 #### 6. Improvements & Future work
 ##### Training Network
-This project takes a lot of time to train. As I understand on a high level how each layer works, and how they should be used, sometimes it's hard to interprete the results of improvement efforts. For example, in the lecture it suggests not use skip connections in all the layers, but once I take out the any skip connection, the model test score falls by a large percent. Also, I would like to read more on how to fine-tune filter size in each layer, how the choice of strides affect the results, and other techniques to fine-tune the network to reach optimal performance.
+This project takes a lot of time to train, and figure out what data to collect. As I understand on a high level how each layer works, and how they should be used, sometimes it's hard to interprete the results of improvement efforts. For example, in the lecture it suggests not use skip connections in all the layers, but once I take out one of the skip connections, the model test score falls by a large percent. Also, I would like to read more on how to fine-tune filter size in each layer, how the choice of strides affect the results, and other techniques to fine-tune the network to reach optimal performance.
 Another point worth mentioning is the randomization of data set, so that each batch has a good representation of all three scenarios evenly distributed.
 
 ##### Data collection
-I noticed in test evaluation that: 
-case#1 for following behind the target, the IOU for hero is 0.86, other people 0.24
-case#2 for patrol without target, the IOU for hero is 0, other people 0.59
-case#3 for target from far away, the IOU for hero is 0.17, other people 0.32
+To make the score higher, I noticed that we need to collect more information regarding which IOU score are low in results, and collect the data correspondingly. This has helped improved the score without having to change the network, and watch out for the effect of small data and fixed test set problem.
 
-Since I've collected most of data for following target, a set of data of target from far away, and a set of data of patrol without target. The following target scenario is doing relatively well compared to the other two cases. To further improve the model, I need to collect data in case#2 and case#3 
+case#1 for following behind the target, the network is doing pretty good. This is due to the fact that I've collected a good amount of data following target from directly above and at different angles.
+
+case#2 for patrol without target, the network has 69 false positives. I have collected a set of data patrolling the crowd, but more often at some distance but not too close. The false positives is likely due to the fact that in the training data we're missing (or in low quantity) the patrol near other people case, which is true since I took out those data where I collected directly above other people, but not as in test case where it's really close to other people but not directly above.
+
+case#3 for target from far away, number true positives: 135, number false positives: 3, number false negatives: 166. I have collected a good amount of data of hero from far away at the crosswalk and with the grass background. The fact that we have many false negatives may due to the fact that some of the backgrounds in the test are not present in the training data set. For example, near the street, hero with one leg showing in the image, etc.
+
+To further improve the test score, I need to study the test set and the angles and background present in the test set if I only have time to collect small data size. To further improve the model and its robustness, a huge train data is needed with all kinds of images and possibilities, such as images patrolling over other people, walking in different backgrounds, partial and full presence of hero/others in image, etc. Another trick to apply is to utilize the fact that the hero is almost all 'red' in color, thus we can pick out the red channel to build a small network on its own and ensemble that with the RGB network.
