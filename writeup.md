@@ -26,7 +26,7 @@ You're reading it!
 The network consists of mainly 3 parts: encoder, 1x1 convolution, and decoder.
 The neural network structure is shown below:
 
-[image1]
+![alt text][image1]
 ##### Encoder layers
 The encoder part is composed of 4 encoder layers. 
 The first layer has a filter size of 16, and stride of 2. The output shape of this layer is 64x64x32 (128/stride)
